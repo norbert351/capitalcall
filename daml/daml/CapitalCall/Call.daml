@@ -124,7 +124,9 @@ template CapitalCall
     observer capLps <> [capAuditor]
 
     -- | Instantiate one LPObligation per LP so each LP sees only their slice.
-    choice IssueObligations : [ContractId LPObligation]
+    -- `nonconsuming` keeps the CapitalCall live after issuance (the call is
+    -- archived only by CloseCall), matching real fund operations.
+    nonconsuming choice IssueObligations : [ContractId LPObligation]
       controller capGp
       do
         -- Each LP owes one unit of the call currency (fixed split for the

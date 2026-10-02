@@ -1,17 +1,9 @@
-# Secrets — never commit
-.env
-.env.*
-**/data/
-*.key
-*.pem
 node_modules/
-
-# Daml build artifacts
-*.dar
-.daml/
+backend/data/
 daml/.daml/
-
-# Runtime
-npm-debug.log*
-*.log
-.DS_Store
+.daml/
+*.db
+*.db-wal
+*.db-shm
+daml/log/
+daml/navigator.log

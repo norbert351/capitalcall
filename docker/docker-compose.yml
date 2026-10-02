@@ -1,0 +1,78 @@
+# CapitalCall — reproducible Canton LocalNet
+# Boots a real Canton participant (DAML sandbox + JSON API) and provisions the
+# demo parties deterministically, then serves the CapitalCall backend against it.
+#
+#   docker compose -f docker/docker-compose.yml up --build
+#
+# The backend's CANTON_LEDGER=json path talks to this real ledger via the Daml
+# JSON API on :7575. Every capital-call settle + governed-treasury approval is a
+# live Canton transaction enforced by capitalcall.dar on the participant.
+
+name: capitalcall
+
+services:
+  canton:
+    image: digitalasset/daml-sdk:2.10.2
+    container_name: capitalcall-canton
+    # host network so the sandbox's loopback-bound JSON API is reachable on
+    # 127.0.0.1:7575 without the loopback NAT problem under Docker.
+    network_mode: host
+    volumes:
+      - ../daml:/home/daml/work
+    working_dir: /home/daml/work
+    command: daml start
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:7575/readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+      start_period: 40s
+    restart: unless-stopped
+
+  bootstrap:
+    image: digitalasset/daml-sdk:2.10.2
+    container_name: capitalcall-bootstrap
+    network_mode: host
+    volumes:
+      - ../daml:/home/daml/work
+    working_dir: /home/daml/work
+    # Allocates the demo parties (GP, LP1, LP2, AUDIT, VAULT) as soon as the
+    # ledger is alive. The backend discovers these via /v1/parties (displayName).
+    command: >
+      sh -c '
+        echo "waiting for Json API...";
+        for i in $(seq 1 60); do
+          curl -fsS http://127.0.0.1:7575/readyz >/dev/null 2>&1 && break;
+          sleep 1;
+        done;
+        echo "Json API up; allocating demo parties";
+        for p in GP LP1 LP2 AUDIT VAULT; do
+          daml ledger allocate-party "$$p" --port 6865 --host localhost || true;
+        done;
+        echo "PARTIES_PROVISIONED";
+      '
+    depends_on:
+      canton:
+        condition: service_healthy
+    restart: "no"
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.backend
+    container_name: capitalcall-backend
+    network_mode: host
+    environment:
+      CANTON_LEDGER: json
+      CANTON_JSON_URL: http://127.0.0.1:7575
+      PORT: 8080
+      CAPITALCALL_DB: /data/capitalcall.db
+    volumes:
+      - backend-data:/data
+    depends_on:
+      bootstrap:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  backend-data:

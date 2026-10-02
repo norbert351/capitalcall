@@ -1,0 +1,7 @@
+# CapitalCall backend — zero-dependency Node service (node:22 has node:sqlite).
+FROM node:22-alpine
+WORKDIR /app
+COPY backend/ /app/
+RUN mkdir -p /app/data
+EXPOSE 8080
+CMD ["node", "src/index.js"]
