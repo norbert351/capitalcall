@@ -5,19 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CapitalCall Console — atomic fund operations</title>
 <meta name="description" content="CapitalCall console: create funds, issue capital calls, settle atomically, and run a governed treasury on Canton.">
-<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="static/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/app.css">
+<link rel="stylesheet" href="static/app.css">
 </head>
 <body class="console">
   <div class="app-shell">
     <!-- SIDEBAR -->
     <aside class="sidebar" id="sidebar">
-      <a class="brand" href="/">
+      <a class="brand" href="./">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
         </span>
@@ -28,7 +28,7 @@
         <a href="#funds" data-route><span class="ic">◈</span> Funds & Calls</a>
         <a href="#treasury" data-route><span class="ic">◉</span> Treasury</a>
         <a href="#audit" data-route><span class="ic">≡</span> Audit Ledger</a>
-        <a href="/" class="home-link"><span class="ic">←</span> Marketing site</a>
+        <a href="./" class="home-link"><span class="ic">←</span> Marketing site</a>
       </nav>
       <div class="side-foot">
         <div class="me" id="mePill"></div>
@@ -62,7 +62,7 @@
   <!-- AUTH GATE -->
   <div class="gate" id="gate">
     <div class="gate-card">
-      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">
+      <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
       </span><span class="brand-name">Capital<b>Call</b></span></a>
       <h1>Open the console</h1>
@@ -88,6 +88,6 @@
     </div>
   </div>
 
-<script src="/static/console.js"></script>
+<script src="static/console.js"></script>
 </body>
 </html>

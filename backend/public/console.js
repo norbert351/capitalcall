@@ -62,9 +62,9 @@
     if (registerMode) {
       var role = document.querySelector('input[name=role]:checked').value;
       body.role = role;
-      apiPost('/api/register', body).then(enterApp).catch(function (er) { toast(er.message, false); });
+      apiPost('./api/register', body).then(enterApp).catch(function (er) { toast(er.message, false); });
     } else {
-      apiPost('/api/login', body).then(enterApp).catch(function (er) { toast(er.message, false); });
+      apiPost('./api/login', body).then(enterApp).catch(function (er) { toast(er.message, false); });
     }
   });
 
@@ -82,7 +82,7 @@
   }
 
   $('logoutBtn').addEventListener('click', function () {
-    apiPost('/api/logout', {}).finally(function () {
+    apiPost('./api/logout', {}).finally(function () {
       me = null; showGate();
       ['mePill', 'mePill2'].forEach(function (id) { $(id).innerHTML = ''; });
     });
@@ -113,15 +113,15 @@
 
   function loadFunds() {
     return Promise.all([
-      api('/api/funds').then(function (d) { funds = d; }).catch(function () { funds = []; }),
-      api('/api/calls').then(function (d) { calls = d; }).catch(function () { calls = []; }),
-      api('/api/obligations').then(function (d) { obligations = d; }).catch(function () { obligations = []; })
+      api('./api/funds').then(function (d) { funds = d; }).catch(function () { funds = []; }),
+      api('./api/calls').then(function (d) { calls = d; }).catch(function () { calls = []; }),
+      api('./api/obligations').then(function (d) { obligations = d; }).catch(function () { obligations = []; })
     ]);
   }
   function loadTreasury() {
     return Promise.all([
-      api('/api/treasuries').then(function (d) { treasuries = d; }).catch(function () { treasuries = []; }),
-      api('/api/treasuries/proposals').then(function (d) { proposals = d; }).catch(function () { proposals = []; })
+      api('./api/treasuries').then(function (d) { treasuries = d; }).catch(function () { treasuries = []; }),
+      api('./api/treasuries/proposals').then(function (d) { proposals = d; }).catch(function () { proposals = []; })
     ]);
   }
 
@@ -297,20 +297,20 @@
   function createFund(e) {
     e.preventDefault();
     var lps = $('fLps').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
-    apiPost('/api/funds', { name: $('fFundName').value || 'Fund', currency: $('fCur').value, auditor: $('fAud').value || 'audit1', lps: lps })
+    apiPost('./api/funds', { name: $('fFundName').value || 'Fund', currency: $('fCur').value, auditor: $('fAud').value || 'audit1', lps: lps })
       .then(function () { toast('Fund created ✓', true); $('fFundName').value = ''; $('fLps').value = ''; loadAll(); })
       .catch(function (er) { toast(er.message, false); });
   }
   function createCall(e) {
     e.preventDefault();
     var fid = $('fFundSel').value;
-    apiPost('/api/calls', { fundId: fid, currency: 'cBTC' })
+    apiPost('./api/calls', { fundId: fid, currency: 'cBTC' })
       .then(function () { toast('Capital call issued ✓', true); loadAll(); })
       .catch(function (er) { toast(er.message, false); });
   }
   function createTreasury(e) {
     e.preventDefault();
-    apiPost('/api/treasuries', {
+    apiPost('./api/treasuries', {
       balanceMicro: Number($('tBal').value || 0) * 1e6,
       governors: $('tGov').value.split(',').map(function (s) { return s.trim(); }).filter(Boolean),
       threshold: Number($('tQ').value || 1), vault: $('tVault').value || 'vault1'
@@ -329,32 +329,32 @@
   });
 
   function settleObligation(callId, lp) {
-    apiPost('/api/obligations/' + encodeURIComponent(callId) + '/' + encodeURIComponent(lp) + '/settle', { auditNote: 'manager confirms atomic settle' })
+    apiPost('./api/obligations/' + encodeURIComponent(callId) + '/' + encodeURIComponent(lp) + '/settle', { auditNote: 'manager confirms atomic settle' })
       .then(function (d) { toast('Atomic settle ✓ share ' + esc(d.shareId), true); loadAll(); })
       .catch(function (er) { toast(er.message, false); });
   }
   function openPropose(treasuryId) {
     var amt = window.prompt('Payout amount (whole units):', '1');
     if (amt === null) return;
-    apiPost('/api/treasuries/propose', { treasuryId: treasuryId, amountMicro: Number(amt) * 1e6, reason: 'management payout', dest: 'vault1' })
+    apiPost('./api/treasuries/propose', { treasuryId: treasuryId, amountMicro: Number(amt) * 1e6, reason: 'management payout', dest: 'vault1' })
       .then(function () { toast('Proposal created — pending quorum', true); loadAll(); })
       .catch(function (er) { toast(er.message, false); });
   }
   function approveProposal(id) {
-    apiPost('/api/treasuries/approve', { proposalId: id })
+    apiPost('./api/treasuries/approve', { proposalId: id })
       .then(function (d) { toast(d.dispatched ? 'Quorum met — payout dispatched ✓' : 'Approval recorded', true); loadAll(); })
       .catch(function (er) { toast(er.message, false); });
   }
 
   /* ---------- BOOT ---------- */
   // ledger pill reflects real mode
-  api('/api/health').then(function (h) {
+  api('./api/health').then(function (h) {
     var pill = $('ledgerPill');
     var txt = document.createTextNode(' ' + (h.ledger === 'json' ? 'live Canton' : 'demo sim'));
     pill.appendChild(txt);
   }).catch(function () {});
   // gate: try to restore session
-  api('/api/me').then(function (u) {
+  api('./api/me').then(function (u) {
     if (u && u.handle) { enterApp(u); route(); }
     else showGate();
   }).catch(function () { showGate(); });

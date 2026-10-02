@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CapitalCall — atomic capital calls on Canton</title>
 <meta name="description" content="CapitalCall turns private-fund capital calls into a single atomic pay↔issue transaction on the Canton ledger — no missed calls, no T+1 gap, no single-manager treasury.">
-<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="static/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://api.fontshare.com" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/static/styles.css">
+<link rel="stylesheet" href="static/styles.css">
 </head>
 <body class="landing">
   <div class="grain"></div>
@@ -19,7 +19,7 @@
   <!-- NAV -->
   <header class="nav-wrap" id="nav">
     <div class="nav inner">
-      <a class="brand" href="/">
+      <a class="brand" href="./">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
         </span>
@@ -31,7 +31,7 @@
         <a href="#privacy">Privacy</a>
         <a href="#treasury">Treasury</a>
       </nav>
-      <a class="btn gr-primary" href="/app">Open the console <span>→</span></a>
+      <a class="btn gr-primary" href="app">Open the console <span>→</span></a>
       <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
         <span></span><span></span><span></span>
       </button>
@@ -41,14 +41,14 @@
       <a href="#how">How it works</a>
       <a href="#privacy">Privacy</a>
       <a href="#treasury">Treasury</a>
-      <a class="btn gr-primary" href="/app">Open the console →</a>
+      <a class="btn gr-primary" href="app">Open the console →</a>
     </div>
   </header>
 
   <!-- HERO -->
   <section class="hero">
     <div class="hero-bg">
-      <img src="/static/images/deal.jpg" alt="Fund managers closing a capital call" loading="eager">
+      <img src="static/images/deal.jpg" alt="Fund managers closing a capital call" loading="eager">
       <div class="scrim"></div>
     </div>
     <div class="hero-copy inner">
@@ -58,7 +58,7 @@
       deposit and the manager's share mint close in one atomic step on Canton —
       so nobody misses a call, and no single manager can touch the treasury.</p>
       <div class="hero-cta gr-reveal" style="--d:270ms">
-        <a class="btn gr-primary lg" href="/app">Open the console <span>→</span></a>
+        <a class="btn gr-primary lg" href="app">Open the console <span>→</span></a>
         <a class="btn gr-ghost lg" href="#how">See how it works</a>
       </div>
       <div class="hero-meta gr-reveal" style="--d:360ms">
@@ -123,7 +123,7 @@
     </div>
     <div class="split gr-reveal" id="how">
       <div class="split-img">
-        <img src="/static/images/sign.jpg" alt="Manager and LP signing a commitment">
+        <img src="static/images/sign.jpg" alt="Manager and LP signing a commitment">
       </div>
       <div class="split-copy">
         <span class="kicker">how it works</span>
@@ -153,7 +153,7 @@
         </div>
       </div>
       <div class="split-img">
-        <img src="/static/images/ledger.jpg" alt="Ledger with per-LP obligations">
+        <img src="static/images/ledger.jpg" alt="Ledger with per-LP obligations">
       </div>
     </div>
   </section>
@@ -195,17 +195,17 @@
       <span class="kicker">ready when you are</span>
       <h2>Take the console for a spin.</h2>
       <p>Create a fund. Issue a call. Watch the share mint — live, on the ledger.</p>
-      <a class="btn gr-primary lg" href="/app">Open the console <span>→</span></a>
+      <a class="btn gr-primary lg" href="app">Open the console <span>→</span></a>
     </div>
   </section>
 
   <footer class="footer inner">
-    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">
+    <a class="brand" href="./"><span class="brand-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
     </span><span class="brand-name">Capital<b>Call</b></span></a>
     <p>Atomic fund operations on Canton · HackCanton S3 · Track 3 + BitSafe treasury</p>
   </footer>
 
-<script src="/static/app.js"></script>
+<script src="static/app.js"></script>
 </body>
 </html>
