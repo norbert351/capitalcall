@@ -91,13 +91,16 @@ const server = http.createServer(async (req, res) => {
 
   try {
     // ---- static UI ----
-    if (method === 'GET' && (p === '/' || p.startsWith('/static/'))) {
-      let file = p === '/' ? 'index.html' : p.replace(/^\/static\//, '');
+    if (method === 'GET' && (p === '/' || p === '/app' || p.startsWith('/static/'))) {
+      let file;
+      if (p === '/') file = 'index.html';
+      else if (p === '/app') file = 'app.html';
+      else file = p.replace(/^\/static\//, '');
       const full = path.resolve(PUBLIC_DIR, file);
       if (!full.startsWith(PUBLIC_DIR)) return json(res, 403, { error: 'forbidden' });
-      if (!fs.existsSync(full)) return json(res, 404, { error: 'not found' });
+      if (!fs.existsSync(full) || fs.statSync(full).isDirectory()) return json(res, 404, { error: 'not found' });
       const ext = path.extname(full).toLowerCase();
-      const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.svg': 'image/svg+xml', '.json': 'application/json' };
+      const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.json': 'application/json', '.ico': 'image/x-icon' };
       res.writeHead(200, { 'Content-Type': mime[ext] || 'application/octet-stream' });
       return res.end(fs.readFileSync(full));
     }

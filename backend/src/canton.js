@@ -62,12 +62,22 @@ class SimulatedCanton {
   }
 
   // ---- privacy: what can a party see? ----
+  // Emits the SAME canonical shape as the real Canton ledger (obCallId,
+  // obStatus, obAmount.micro, capCallId, capStatus…) so the frontend has ONE
+  // contract across both backends.
   visibleCalls(party) {
     const out = [];
     for (const c of this.calls) {
       const funding = db.getFund(c.fundId);
       const lps = funding ? funding.lps : [];
-      if (party === c.gp || party === c.auditor || lps.includes(party)) out.push(c);
+      if (party === c.gp || party === c.auditor || lps.includes(party)) {
+        out.push({
+          id: c.id, capCallId: c.id, capFundId: c.fundId,
+          capFundName: funding ? funding.name : '',
+          capGp: c.gp, capAuditor: c.auditor, capCurrency: c.currency,
+          capDue: '', capLps: lps, capStatus: c.status,
+        });
+      }
     }
     return out;
   }
@@ -77,8 +87,15 @@ class SimulatedCanton {
     for (const c of this.calls) {
       const obs = db.obligationsForCall(c.id);
       for (const o of obs) {
-        if (party === o.gp || party === o.auditor) { out.push(o); continue; }
-        if (party === o.lp) out.push(o);
+        if (party !== o.gp && party !== o.auditor && party !== o.lp) continue;
+        out.push({
+          obCallId: o.callId, obFundId: c.fundId,
+          obGp: canonParty(o.gp), obLp: canonParty(o.lp), obAuditor: canonParty(o.auditor),
+          obAmount: { micro: String(o.amountMicro) }, obCurrency: o.currency,
+          obDue: '', obStatus: o.status === 'paid' ? 'CallClosed' : o.status,
+          obPaidMicro: String(o.status === 'paid' ? o.amountMicro : 0),
+          shareId: o.shareId || (o.status === 'paid' ? `${o.callId}:${o.lp}` : null),
+        });
       }
     }
     return out;

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CapitalCall Console — atomic fund operations</title>
+<meta name="description" content="CapitalCall console: create funds, issue capital calls, settle atomically, and run a governed treasury on Canton.">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/app.css">
+</head>
+<body class="console">
+  <div class="app-shell">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
+        </span>
+        <span class="brand-name">Capital<b>Call</b></span>
+      </a>
+      <nav class="side-nav" id="sideNav">
+        <a href="#dashboard" data-route><span class="ic">◎</span> Dashboard</a>
+        <a href="#funds" data-route><span class="ic">◈</span> Funds & Calls</a>
+        <a href="#treasury" data-route><span class="ic">◉</span> Treasury</a>
+        <a href="#audit" data-route><span class="ic">≡</span> Audit Ledger</a>
+        <a href="/" class="home-link"><span class="ic">←</span> Marketing site</a>
+      </nav>
+      <div class="side-foot">
+        <div class="me" id="mePill"></div>
+        <button class="btn gr-ghost sm" id="logoutBtn">Sign out</button>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- topbar -->
+      <div class="topbar">
+        <button class="bar-burger" id="barBurger" aria-label="Menu"><span></span><span></span><span></span></button>
+        <div class="crumb" id="crumb">Console</div>
+        <div class="top-right">
+          <span class="ledger-pill" id="ledgerPill"><span class="dot"></span> ledger</span>
+          <div class="me2" id="mePill2"></div>
+        </div>
+      </div>
+
+      <div class="views" id="views">
+        <div class="view" data-view="dashboard"></div>
+        <div class="view" data-view="funds"></div>
+        <div class="view" data-view="treasury"></div>
+        <div class="view" data-view="audit"></div>
+      </div>
+
+      <div class="toast" id="toast" role="status"></div>
+    </main>
+  </div>
+
+  <!-- AUTH GATE -->
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
+      </span><span class="brand-name">Capital<b>Call</b></span></a>
+      <h1>Open the console</h1>
+      <p class="gate-sub">Sign in to manage funds, calls, and the governed treasury.</p>
+      <div class="gate-tabs">
+        <button class="tab on" id="tabLogin">Sign in</button>
+        <button class="tab" id="tabRegister">Create account</button>
+      </div>
+      <form id="authForm" autocomplete="on">
+        <label>Handle<input id="fHandle" name="handle" placeholder="e.g. gp1" autocomplete="username" required></label>
+        <label>Password<input id="fPass" name="password" type="password" placeholder="••••••••" autocomplete="current-password" required></label>
+        <div class="role-row" id="roleRow" style="display:none">
+          <span>Role</span>
+          <div class="roles">
+            <label><input type="radio" name="role" value="GP"><span>GP</span></label>
+            <label><input type="radio" name="role" value="LP" checked><span>LP</span></label>
+            <label><input type="radio" name="role" value="AUDITOR"><span>Auditor</span></label>
+          </div>
+        </div>
+        <button class="btn gr-primary full" id="authBtn" type="submit">Sign in →</button>
+      </form>
+      <p class="gate-hint">Demo parties: <code>gp1</code> / <code>lp1</code> / <code>audit1</code> · password <code>pass1234</code></p>
+    </div>
+  </div>
+
+<script src="/static/console.js"></script>
+</body>
+</html>

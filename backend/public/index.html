@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CapitalCall — atomic capital calls on Canton</title>
+<meta name="description" content="CapitalCall turns private-fund capital calls into a single atomic pay↔issue transaction on the Canton ledger — no missed calls, no T+1 gap, no single-manager treasury.">
+<link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://api.fontshare.com" crossorigin>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://api.fontshare.com/v2/css?f[]=gambetta@400,500,600&f[]=satoshi@400,500,700,900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="landing">
+  <div class="grain"></div>
+
+  <!-- NAV -->
+  <header class="nav-wrap" id="nav">
+    <div class="nav inner">
+      <a class="brand" href="/">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
+        </span>
+        <span class="brand-name">Capital<b>Call</b></span>
+      </a>
+      <nav class="nav-links">
+        <a href="#solve">Why</a>
+        <a href="#how">How it works</a>
+        <a href="#privacy">Privacy</a>
+        <a href="#treasury">Treasury</a>
+      </nav>
+      <a class="btn gr-primary" href="/app">Open the console <span>→</span></a>
+      <button class="burger" id="burger" aria-label="Menu" aria-expanded="false">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+    <div class="mobile-menu" id="mobileMenu">
+      <a href="#solve">Why</a>
+      <a href="#how">How it works</a>
+      <a href="#privacy">Privacy</a>
+      <a href="#treasury">Treasury</a>
+      <a class="btn gr-primary" href="/app">Open the console →</a>
+    </div>
+  </header>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg">
+      <img src="/static/images/deal.jpg" alt="Fund managers closing a capital call" loading="eager">
+      <div class="scrim"></div>
+    </div>
+    <div class="hero-copy inner">
+      <span class="kicker gr-reveal"><span class="dot"></span> live on the Canton ledger</span>
+      <h1 class="gr-reveal" style="--d:90ms">Capital calls<br>land <em>atomically</em>.</h1>
+      <p class="gr-reveal" style="--d:180ms">CapitalCall turns each call into a single pay↔issue transaction. The LP's
+      deposit and the manager's share mint close in one atomic step on Canton —
+      so nobody misses a call, and no single manager can touch the treasury.</p>
+      <div class="hero-cta gr-reveal" style="--d:270ms">
+        <a class="btn gr-primary lg" href="/app">Open the console <span>→</span></a>
+        <a class="btn gr-ghost lg" href="#how">See how it works</a>
+      </div>
+      <div class="hero-meta gr-reveal" style="--d:360ms">
+        <span><b>1 tx</b> · settle + mint</span>
+        <span><b>100%</b> privacy-per-LP</span>
+        <span><b>≥2</b> governors to move funds</span>
+      </div>
+    </div>
+    <a class="scroll-cue" href="#solve" aria-label="scroll"><span></span></a>
+  </section>
+
+  <!-- SIGNATURE: ATOMIC SETTLEMENT PANEL -->
+  <section class="settle-section inner">
+    <div class="section-head gr-reveal">
+      <span class="kicker">the atomic settlement</span>
+      <h2>One step. Escrow in, share out.</h2>
+      <p>Watch the DvP — the deposit and the mint are a single multi-party Canton
+      transaction, enforced by the contract. No T+1 gap, no floating half-done call.</p>
+    </div>
+    <div class="settle-panel gr-reveal" id="settlePanel" role="img" aria-label="Animated atomic settlement: LP escrow and GP share mint join in one step">
+      <div class="settle-ring settle-ring-lp">
+        <div class="ring-core">LP<br><b>$1M</b><small>escrow</small></div>
+        <div class="ring-arc" data-side="lp"></div>
+      </div>
+      <div class="settle-bolt" aria-hidden="true">
+        <svg viewBox="0 0 120 60"><path d="M20 30 L100 30" /></svg>
+        <span>1 tx</span>
+      </div>
+      <div class="settle-ring settle-ring-gp">
+        <div class="ring-core">GP<br><b>LPShare</b><small>minted</small></div>
+        <div class="ring-arc" data-side="gp"></div>
+      </div>
+      <div class="settle-tag">Atomic settle <b>✓</b></div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why inner" id="solve">
+    <div class="section-head gr-reveal">
+      <span class="kicker">the problem</span>
+      <h2>Fund ops still run on emails & spreadsheets.</h2>
+    </div>
+    <div class="card-grid">
+      <div class="card gr-reveal">
+        <span class="card-num">01</span>
+        <h3>LPs miss calls</h3>
+        <p>A $25,000 call unnoticed until it's late. CapitalCall meets the LP
+        where their obligation is — the moment it's issued, on the ledger.</p>
+      </div>
+      <div class="card gr-reveal" style="--d:90ms">
+        <span class="card-num">02</span>
+        <h3>The T+1 gap</h3>
+        <p>Pay today, share lands tomorrow. A counterparty window where neither
+        side is safe. CapitalCall closes deposit <em>and</em> mint in one transaction.</p>
+      </div>
+      <div class="card gr-reveal" style="--d:180ms">
+        <span class="card-num">03</span>
+        <h3>One-quorum treasury</h3>
+        <p>Every transfer passes a governor quorum on-ledger. No single manager
+        can move LP capital below the threshold.</p>
+      </div>
+    </div>
+    <div class="split gr-reveal" id="how">
+      <div class="split-img">
+        <img src="/static/images/sign.jpg" alt="Manager and LP signing a commitment">
+      </div>
+      <div class="split-copy">
+        <span class="kicker">how it works</span>
+        <h2>Three moves. Settled the moment it's due.</h2>
+        <ol class="steps">
+          <li><b>01 — <em>Issue</em></b> the GP issues a call against the LP roster on Canton.</li>
+          <li><b>02 — <em>Settle</em></b> the LP pays into an escrow and the GP's share is minted — atomically, one tx.</li>
+          <li><b>03 — <em>Audit</em></b> the auditor sees every obligation and every share, immutably.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="privacy inner" id="privacy">
+    <div class="split rev gr-reveal">
+      <div class="split-copy">
+        <span class="kicker">ledger-enforced privacy</span>
+        <h2>Each LP sees only their own slice.</h2>
+        <p>Disclosure is enforced by Canton's privacy model, not a policy checkbox.
+        LP&nbsp;1 sees LP&nbsp;1's obligation. LP&nbsp;2 sees LP&nbsp;2's. The auditor
+        sees the full book. Nothing else leaks.</p>
+        <div class="pill-row">
+          <span class="pill ok">LP 1 → own obligation</span>
+          <span class="pill ok">LP 2 → own obligation</span>
+          <span class="pill gold">Auditor → full book</span>
+        </div>
+      </div>
+      <div class="split-img">
+        <img src="/static/images/ledger.jpg" alt="Ledger with per-LP obligations">
+      </div>
+    </div>
+  </section>
+
+  <!-- TREASURY -->
+  <section class="treasury" id="treasury">
+    <div class="treasury-inner inner">
+      <div class="treasury-copy gr-reveal">
+        <span class="kicker">governed treasury</span>
+        <h2>Threshold quorum, on-chain.</h2>
+        <p>A transfer can't dispatch on one signature. Governors approve on the
+        ledger, and the moment the quorum is met the payout moves atomically —
+        the balance debits with the receipt, in the same transaction.</p>
+        <div class="quorum" aria-hidden="true">
+          <div class="q-gov ok">GP ✓</div>
+          <div class="q-gov ok">Vault ✓</div>
+          <div class="q-line"><span>2 / 2</span></div>
+          <b>dispatched</b>
+        </div>
+      </div>
+      <div class="treasury-band gr-reveal">
+        <span class="band-label">governed treasury</span>
+        <div class="band-row">
+          <span>Balance</span><b>$5,000,000</b>
+        </div>
+        <div class="band-row">
+          <span>Quorum</span><b>2 / 2 governors</b>
+        </div>
+        <div class="band-row">
+          <span>Last payout</span><b class="ok">✓ atomic</b>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="cta inner">
+    <div class="cta-card gr-reveal">
+      <span class="kicker">ready when you are</span>
+      <h2>Take the console for a spin.</h2>
+      <p>Create a fund. Issue a call. Watch the share mint — live, on the ledger.</p>
+      <a class="btn gr-primary lg" href="/app">Open the console <span>→</span></a>
+    </div>
+  </section>
+
+  <footer class="footer inner">
+    <a class="brand" href="/"><span class="brand-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7l9-3 9 3v10l-9 3-9-3V7z"/><path d="M12 4v16M6.5 9.5L12 12l5.5-2.5"/></svg>
+    </span><span class="brand-name">Capital<b>Call</b></span></a>
+    <p>Atomic fund operations on Canton · HackCanton S3 · Track 3 + BitSafe treasury</p>
+  </footer>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
