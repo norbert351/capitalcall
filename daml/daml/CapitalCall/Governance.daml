@@ -1,0 +1,118 @@
+-- | Governance module: the governed treasury / DecentralizedParty guard.
+--
+-- BitSafe challenge spine ("governed treasury/custody: shared approval for
+-- sensitive transfers/limits"). No single governor can move fund capital below
+-- the approval threshold. A proposal is created by one governor against the
+-- treasury and only dispatches once >= threshold distinct governors approve it.
+-- The quorum check is transaction-atomic: the last required approval archives
+-- the proposal and mints the payout receipt in the SAME choice -- a payout is
+-- gated on quorum, never on a single GP.
+module CapitalCall.Governance where
+
+import CapitalCall.Types (Money, addMoney)
+
+-- | The governed treasury pool. Holds a named balance (accounting on-ledger;
+-- the actual token custody is a cBTC/USDC escrow service). Governors are the
+-- parties whose quorum unlocks a transfer.
+template GovernedTreasury
+  with
+    treasuryId : Text
+    treasuryFundId : Text
+    treasuryCurrency : Text
+    treasuryGovernors : [Party]
+    treasuryThreshold : Int          -- distinct approvals required
+    treasuryBalance : Money
+    treasuryVault : Party            -- the escrow/custody party holding the tokens
+  where
+    signatory treasuryVault
+    observer treasuryGovernors
+
+    -- | Mint more balance into the treasury (e.g. a settled capital call
+    -- credits the pool). The calling governor must be on the roster.
+    choice Credit : ContractId GovernedTreasury
+      with
+        creditAmount : Money
+        creditProposer : Party
+      controller creditProposer
+      do
+        assert (creditProposer `elem` this.treasuryGovernors)
+        create this with treasuryBalance = this.treasuryBalance `addMoney` creditAmount
+
+    -- | Declare a transfer proposal. Requires the proposing governor's
+    -- signature but the TOKEN stays in the treasury until quorum is met.
+    choice ProposeTransfer : ContractId TransferProposal
+      with
+        proposalId : Text
+        amount : Money
+        destParty : Party
+        reason : Text
+        proposer : Party
+      controller proposer
+      do
+        assert (proposer `elem` this.treasuryGovernors)
+        assert (amount <= this.treasuryBalance)
+        create TransferProposal with
+          proposalId = proposalId
+          proposalTreasuryId = this.treasuryId
+          proposalCurrency = this.treasuryCurrency
+          proposalGovernors = this.treasuryGovernors
+          proposalThreshold = this.treasuryThreshold
+          proposalAmount = amount
+          proposalDest = destParty
+          proposalReason = reason
+          proposalApprovals = [proposer]
+          proposalExecuted = False
+
+-- | A transfer proposal: created by one governor, approved by others. When
+-- approvals reach the threshold the proposal archives itself and mints the
+-- payout receipt atomically in that same choice.
+template TransferProposal
+  with
+    proposalId : Text
+    proposalTreasuryId : Text
+    proposalCurrency : Text
+    proposalGovernors : [Party]
+    proposalThreshold : Int
+    proposalAmount : Money
+    proposalDest : Party
+    proposalReason : Text
+    proposalApprovals : [Party]
+    proposalExecuted : Bool
+  where
+    signatory proposalDest
+    observer proposalGovernors <> [proposalDest]
+
+    -- | A governor approves. On reaching quorum, the last signature archives
+    -- the pre-quorum proposal and mints the receipt -- atomically.
+    choice Approve : ContractId TransferProposal
+      with
+        approver : Party
+      controller approver
+      do
+        assert (approver `elem` this.proposalGovernors)
+        assert (approver `notElem` this.proposalApprovals)
+        assert (not this.proposalExecuted)
+        let updated = this with proposalApprovals = this.proposalApprovals <> [approver]
+        if length updated.proposalApprovals >= this.proposalThreshold
+          then do
+            create TransferReceipt with
+              receiptProposalId = this.proposalId
+              receiptAmount = this.proposalAmount
+              receiptDest = this.proposalDest
+              receiptReason = this.proposalReason
+              receiptApprovals = updated.proposalApprovals
+            create updated with proposalExecuted = True
+          else
+            create updated
+
+-- | A final receipt proving the quorum-approved payout executed.
+template TransferReceipt
+  with
+    receiptProposalId : Text
+    receiptAmount : Money
+    receiptDest : Party
+    receiptReason : Text
+    receiptApprovals : [Party]
+  where
+    signatory receiptDest
+    observer receiptApprovals

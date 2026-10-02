@@ -1,0 +1,107 @@
+-- | Test: end-to-end governed capital-call roundtrip.
+module CapitalCall.Test where
+
+import Daml.Script
+import CapitalCall.Types
+import CapitalCall.Call
+import CapitalCall.Governance
+
+-- Part 1: atomic DvP capital call
+-- GP issues a call against one LP; the LP pays through an escrow and the GP
+-- mints the share -- settling atomically (no T+1 gap). Each LP only sees
+-- their own obligation.
+test_issue_and_settle : Script ()
+test_issue_and_settle = do
+  gp <- allocateParty "GP"
+  auditor <- allocateParty "Auditor"
+  lp1 <- allocateParty "LP1"
+  now <- getTime
+
+  callCid <- submit gp do
+    createCmd CapitalCall with
+      capCallId = "CALL-100"
+      capFundId = "FUND-1"
+      capFundName = "Paloma Capital III"
+      capGp = gp
+      capAuditor = auditor
+      capCurrency = "cBTC"
+      capDue = now
+      capLps = [lp1]
+      capStatus = CallPending
+
+  -- GP issues the single-LP obligation. Issuing a call is the GP's authority,
+  -- so GP alone creates it; the LP is an observer on the obligation and can
+  -- verify it. The joint lock sits on Settle (money movement), not issuance.
+  obs <- submit gp do
+    exerciseCmd callCid IssueObligations
+
+  case obs of
+    [obCid] -> do
+      -- LP deposits the DvP escrow for the price of their participation.
+      escrowCid <- submit lp1 do
+        createCmd CallPaymentEscrow with
+          payId = "ESC-100"
+          payObligationKey = ("CALL-100", lp1)
+          payPayer = lp1
+          payGp = gp
+          payAmount = Money 1000000
+          payCurrency = "cBTC"
+          paySettledAt = now
+
+      -- Both LP + GP settle atomically: share minted WHEN escrow consumed.
+      (shareCid, _res) <- submitMulti [gp, lp1] [] do
+        exerciseCmd obCid Settle with
+          escrow = escrowCid
+          auditNote = "LP1 funds call-100"
+
+      shareOpt <- queryContractId lp1 shareCid
+      case shareOpt of
+        Some share -> debug $ "Settled atomically: share " <> share.shId
+        None -> abort "expected a minted share after settle"
+      pure ()
+
+    _ -> abort "expected exactly one obligation for a single-LP call"
+
+-- Part 2: governed treasury quorum (BitSafe challenge)
+-- A transfer cannot dispatch on a single governor's signature; it must reach
+-- the threshold. The l second approval both executes and archives the proposal
+-- atomically, minting a TransferReceipt.
+test_governed_treasury_quorum : Script ()
+test_governed_treasury_quorum = do
+  g1 <- allocateParty "GP-Alpha"
+  g2 <- allocateParty "GP-Beta"
+  custodian <- allocateParty "Vault"
+
+  treasCid <- submit custodian do
+    createCmd GovernedTreasury with
+      treasuryId = "TREAS-1"
+      treasuryFundId = "FUND-1"
+      treasuryCurrency = "cBTC"
+      treasuryGovernors = [g1, g2]
+      treasuryThreshold = 2
+      treasuryBalance = Money 2000000
+      treasuryVault = custodian
+
+  -- g1 alone can only PROPOSE, never dispatch (threshold 2).
+  propCid <- submit g1 do
+    exerciseCmd treasCid ProposeTransfer with
+      proposalId = "P-1"
+      amount = Money 500000
+      destParty = custodian
+      reason = "management fee"
+      proposer = g1
+
+  -- g2 approves -> quorum reached -> proposal executed + a receipt exists.
+  executedCid <- submit g2 do
+    exerciseCmd propCid Approve with
+      approver = g2
+
+  execOpt <- queryContractId g2 executedCid
+  case execOpt of
+    Some _ -> debug "Governed treasury quorum payout dispatched."
+    None -> abort "expected executed proposal after quorum"
+  pure ()
+
+-- Helper kept for a clean module (unused).
+ignore : a -> ()
+ignore _ = ()

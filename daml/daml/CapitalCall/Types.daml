@@ -1,0 +1,27 @@
+-- | Types: shared value types for the CapitalCall fund-operations rail.
+module CapitalCall.Types where
+
+-- | A monetary amount in integer micro-units to avoid float drift.
+-- Use micro-units of the token (1e6 micro = 1 whole token). Money math is
+-- integer-only so nothing mints or vanishes.
+data Money = Money
+  with
+    micro : Int  -- integer micro-units
+  deriving (Eq, Ord, Show)
+
+-- | Integer-safe addition used by the governed treasury credit path.
+addMoney : Money -> Money -> Money
+addMoney (Money a) (Money b) = Money (a + b)
+
+-- | A capital call status (immutable append-only lifecycle, no reversion).
+data CallStatus =
+    CallPending   -- issued, awaiting LP payments
+  | CallClosed    -- settled: fully paid, shares issued
+  | CallDeclined  -- LP declined their obligation
+  | CallOverdue   -- call failed partially / missed
+  deriving (Eq, Show)
+
+-- | A settlement (DvP) outcome.
+data SettlementResult =
+    SettledOk          -- payment received AND shares issued atomically
+  deriving (Eq, Show)

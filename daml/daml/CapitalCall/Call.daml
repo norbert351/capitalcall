@@ -1,0 +1,149 @@
+-- | Call module: the atomic capital-call lifecycle.
+--
+-- The spine of the product. A capital call is issued by the GP, and each LP
+-- settles their obligation via a DvP escrow: the LP's token deposit and the
+-- GP's share mint are ONE Daml transaction (`Settle`). Neither side can land
+-- without the other, so there is no T+1 counterparty gap -- the exact claim
+-- the 21X/"tokenization without atomic settlement is just digitization"
+-- critique forces you to *prove*, not assert.
+module CapitalCall.Call where
+
+import CapitalCall.Types
+
+-- | One LP's obligation under a call. The GP is the authoring signatory
+-- (issuing a call is the GP's authority), while the LP and auditor watch as
+-- observers. Privacy: the obligation is only disclosed to the LP it concerns
+-- + the GP + the auditor -- an LP never sees another LP's obligation. The
+-- DUEL-CONTROL lock lives on `Settle`: neither side can move money or mint a
+-- share without the other.
+template LPObligation
+  with
+    obCallId : Text
+    obFundId : Text
+    obGp : Party
+    obLp : Party
+    obAuditor : Party
+    obAmount : Money
+    obCurrency : Text
+    obDue : Time
+    obStatus : CallStatus
+    obPaidMicro : Int       -- cumulative paid micro-units (0 until Settle)
+  where
+    signatory obGp
+    observer obLp, obAuditor
+
+    -- | The LP pays via an escrow and the GP mints the share -- atomically.
+    -- Controlled by BOTH parties. If either refuses, neither the token moves
+    -- nor the share exists. This is DvP at the transaction level.
+    choice Settle : (ContractId LPShare, SettlementResult)
+      with
+        escrow : ContractId CallPaymentEscrow
+        auditNote : Text
+      controller obGp, obLp
+      do
+        e <- fetch escrow
+        -- Guard: escrow must be for this exact obligation, right amount,
+        -- right currency, not already paid.
+        assert (e.payObligationKey == (this.obCallId, this.obLp))
+        assert (e.payAmount == this.obAmount)
+        assert (e.payCurrency == this.obCurrency)
+        assert (this.obStatus == CallPending)
+        mShare <- create LPShare with
+          shId = this.obCallId <> ":" <> (show this.obLp)
+          shCallId = this.obCallId
+          shFundId = this.obFundId
+          shGp = this.obGp
+          shLp = this.obLp
+          shAuditor = this.obAuditor
+          shAmount = this.obAmount
+          shCurrency = this.obCurrency
+          shIssuedAt = e.paySettledAt
+        -- Archive the escrow (the token is now spent into the fund pool).
+        archive escrow
+        pure (mShare, SettledOk)
+
+    -- | An LP may formally decline their obligation (recorded for audit).
+    -- Only the LP + GP together (dual control).
+    choice Decline : ()
+      with
+        reason : Text
+      controller obLp, obGp
+      do
+        assert (this.obStatus == CallPending)
+        assert (this.obPaidMicro == 0)
+        create this with obStatus = CallDeclined, obPaidMicro = 0
+        pure ()
+
+-- | The DvP escrow: the LP's locked token earmarked for this obligation.
+-- Signatory = LP; observed by GP. The audit trail shows the escrow, the
+-- settle, and the minted share as connected contracts.
+template CallPaymentEscrow
+  with
+    payId : Text
+    payObligationKey : (Text, Party)  -- (callId, lp)
+    payPayer : Party                  -- the LP
+    payGp : Party
+    payAmount : Money
+    payCurrency : Text
+    paySettledAt : Time
+  where
+    signatory payPayer
+    observer payGp
+
+-- | The issued share, created atomically with the escrow spend in `Settle`.
+-- Proof of the settlement for the LP, the auditor, and the cap table.
+template LPShare
+  with
+    shId : Text
+    shCallId : Text
+    shFundId : Text
+    shGp : Party
+    shLp : Party
+    shAuditor : Party
+    shAmount : Money
+    shCurrency : Text
+    shIssuedAt : Time
+  where
+    signatory shLp
+    observer shGp, shAuditor
+
+-- | The top-level CapitalCall: GP issues it against the LP roster.
+template CapitalCall
+  with
+    capCallId : Text
+    capFundId : Text
+    capFundName : Text
+    capGp : Party
+    capAuditor : Party
+    capCurrency : Text
+    capDue : Time
+    capLps : [Party]
+    capStatus : CallStatus
+  where
+    signatory capGp
+    observer capLps <> [capAuditor]
+
+    -- | Instantiate one LPObligation per LP so each LP sees only their slice.
+    choice IssueObligations : [ContractId LPObligation]
+      controller capGp
+      do
+        -- Each LP owes one unit of the call currency (fixed split for the
+        -- MVP; a real fund reads LPCommitment for per-LP amounts).
+        let share = Money 1000000
+        forA this.capLps $ \anLP -> create LPObligation with
+          obCallId = this.capCallId
+          obFundId = this.capFundId
+          obGp = this.capGp
+          obLp = anLP
+          obAuditor = this.capAuditor
+          obAmount = share
+          obCurrency = this.capCurrency
+          obDue = this.capDue
+          obStatus = CallPending
+          obPaidMicro = 0
+
+    -- | Close the call after settlement: audit-friendly terminal state.
+    choice CloseCall : ContractId CapitalCall
+      controller capGp
+      do
+        create this with capStatus = CallClosed

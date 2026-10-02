@@ -1,0 +1,59 @@
+-- | Fund module: the on-ledger fund entity and each LP's commitment.
+module CapitalCall.Fund where
+
+import CapitalCall.Types
+
+-- | A private investment fund. GP is the sole signatory so only the GP can
+-- manage it; every LP and the auditor watch as observers (privacy: an LP is
+-- not a signatory and has no authority, only the right to see the fund shell).
+template Fund
+  with
+    fundId : Text
+    fundGp : Party
+    fundAuditor : Party
+    fundName : Text
+    fundCurrency : Text          -- e.g. "cBTC", "USDC"
+    fundLps : [Party]            -- current LP roster (observers on the fund)
+  where
+    signatory fundGp
+    observer (fundLps <> [fundAuditor])
+
+    -- | Register a new LP to the roster. GP-only.
+    choice AddLp : ContractId Fund
+      with
+        newLp : Party
+      controller fundGp
+      do
+        assert (newLp `notElem` this.fundLps)
+        create this with fundLps = this.fundLps <> [newLp]
+
+    -- | Capture the roster reference (read-only view).
+    choice GetRoster : [Party]
+      controller fundGp, fundAuditor
+      do
+        pure this.fundLps
+
+-- | An LP's made commitment to the fund: the amount pledged to a call.
+-- Joint signatory (GP + LP) so both must agree it is correct -- the ledger of
+-- record for "how much does LP owe."
+template LPCommitment
+  with
+    commitmentId : Text
+    commitmentFundId : Text
+    commitmentFundName : Text
+    commitmentGp : Party
+    commitmentLp : Party
+    commitmentAmt : Money
+    commitmentCurrency : Text
+  where
+    signatory commitmentGp, commitmentLp  -- dual control: both must authorize
+    -- | LP confirms their own commitment is accurate (dual-control correction).
+    choice ConfirmCommitment : ContractId LPCommitment
+      controller commitmentGp, commitmentLp
+      do
+        create this
+
+    choice RevokeLP : ()
+      controller commitmentGp, commitmentLp
+      do
+        return ()

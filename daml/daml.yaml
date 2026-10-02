@@ -1,0 +1,14 @@
+sdk-version: 2.10.2
+name: capitalcall
+version: 0.1.0
+source: daml
+dependencies:
+  - daml-prim
+  - daml-stdlib
+  - daml-script-lts
+build-options:
+  - --target=1.17
+ledger:
+  scenarios:
+    - CapitalCall.Test:test_issue_and_settle
+    - CapitalCall.Test:test_governed_treasury_quorum
