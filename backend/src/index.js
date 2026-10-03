@@ -234,6 +234,15 @@ const server = http.createServer(async (req, res) => {
       const u2 = requireAuth(req, res); if (!u2) return;
       return json(res, 200, { notices: agent.lpNotices(u2.handle) });
     }
+    // Dispatch outreach: records who the agent contacted (auditable), returns the queue.
+    if (method === 'POST' && p === '/api/agent/outreach') {
+      const u2 = requireAuth(req, res); if (!u2) return;
+      if (u2.role !== 'GP' && u2.role !== 'AUDITOR') return json(res, 403, { error: 'outreach requires GP or auditor role' });
+      const queue = agent.outreachQueue();
+      const now = Date.now();
+      queue.forEach((q) => db.upsertOutreach(q.callId, q.lp, q.action, now));
+      return json(res, 200, { dispatched: queue.length, at: now, items: queue });
+    }
 
     json(res, 404, { error: `no route ${method} ${p}` });
   } catch (e) {

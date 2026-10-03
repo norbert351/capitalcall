@@ -389,8 +389,10 @@
   });
 
   function queueOutreach() {
-    toast('Outreach queued for the LPs who still owe — notices are generated from the live ledger.', true);
-    loadAll();
+    apiPost('./api/agent/outreach', {}).then(function (d) {
+      toast('Outreach dispatched to ' + d.dispatched + ' LP(s) at ' + new Date(d.at).toLocaleTimeString() + ' — recorded on the ledger.', true);
+      loadAll();
+    }).catch(function (er) { toast(er.message, false); });
   }
 
   function settleObligation(callId, lp) {

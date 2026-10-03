@@ -3,7 +3,7 @@
 **Project:** CapitalCall — *atomic fund operations on Canton*
 **Track:** 3 · Investment Infrastructure **+** BitSafe governed-treasury challenge
 **Stack:** Daml 2.10 / Canton · Node (zero-dep) · vanilla-JS console · Docker LocalNet
-**Demo:** `http://129.226.83.2/capitalcall/` (console: `/capitalcall/app`)
+**Demo:** `https://capitalcall.afterhourequity.xyz/` (console: `/app` as **gp1** ; LP view as **lp1**; auditor as **audit1**, password `pass1234`)
 **Status:** submission-ready — docs, demo script, verification matrix in `docs/`.
 Deadline **Oct 9 2026 23:59 UTC** · Grand Final **Oct 21 2026**.
 
@@ -71,7 +71,7 @@ with due-state + action, an 80%-coverage at-risk flag, and an automated outreach
 
 ```bash
 docker compose -f docker/docker-compose.yml up --build   # real Canton LocalNet, auto-discovered parties/package
-# or offline:
-cd backend && PORT=8080 node src/index.js                # ledger=sim
-# parties: gp1 / lp1 / audit1 · password: pass1234
+# or offline (VIGIL owns :8080 on the shared VM — capitalcall serves on :8095):
+cd backend && PORT=8095 node src/index.js               # ledger=sim
+# demo parties: gp1(GP) / lp1 / lp2 (LP) / audit1(AUDITOR) · password: pass1234
 ```

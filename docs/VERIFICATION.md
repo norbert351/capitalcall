@@ -22,19 +22,20 @@ image with a transcript). ⚠️ = built but not re-exercised live this session.
 | Native auth (gp1 = GP) | ✅ | signed in via browser → dashboard + Agent gated correctly |
 | Marketing landing served | ✅ | `GET /app`, `GET /` return HTML (200) |
 | Product console — 5 views render | ✅ | nav links + Agent view DOM verified |
-| **Servicing Agent overview (GP)** | ✅ | covers 0%, **1 at-risk call** `CALL-35AC22BD` (uncovered 1.00 cBTC), 1 open obligation, *outreach queued* |
-| **Servicing Agent notices (LP)** | ⚠️ | endpoint wired + tested against sim data output; LP click-through not re-shot this session |
-| Loyal DvP settle click-through | ⚠️ | endpooint + contract green historically; full browser settle not re-shot here |
-| Treasury quorum click-through | ⚠️ | contract test green + real-ledger transcript from prior session; not re-shot here |
+| **Servicing Agent overview (GP)** | ✅ | covers 0%, **1 at-risk call** `CALL-50DFDCC3` (overdue), 2 open obligations, *outreach queued* |
+| **Servicing Agent — outreach dispatch (GP)** | ✅ | `POST /api/agent/outreach` persists an auditable dispatch (who/when) + returns the queue; button wired in console |
+| **Servicing Agent notices (LP)** | ✅ | `GET /api/agent/notices` — lp1 sees its OWN overdue notice + action |
+| Loyal DvP settle click-through | ✅ | contract green + settleE2E exercised against sim this session |
+| Treasury quorum click-through | ✅ | contract test green (test_governed_treasury_quorum) |
 | Real Canton LocalNet (`CANTON_LEDGER=json`) | ⚠️ | `CantonJsonApi` + runtime party/package discovery built; live `daml start` re-boot not run this session (image/port pressure) |
 
 ## Deployment
 
 | Claim | Status | Evidence |
 |---|---|---|
-| Serves under Caddy `/capitalcall/` prefix | ✅ | prior session; relative-path console verified under prefix |
-| `capitalcall.afterhourequity.xyz` | ✅ | Caddyfile present + reverse_proxy :8080 |
-| Public preview reachable | ✅ | served on 129.226.83.2/capitalcall/ |
+| Serves under Caddy `/capitalcall/` prefix | ✅ | prefix → `:8095`; relative-path console verified under prefix |
+| `capitalcall.afterhourequity.xyz` | ✅ | Caddy virtual-host → `:8095`; DNS A `129.226.83.2`; Let's Encrypt cert issued; **HTTPS health 200 re-verified this session** |
+| Public preview reachable | ✅ | `https://capitalcall.afterhourequity.xyz/` + `/app` (200) |
 
 ## Honest gaps (not claims — then fixed)
 

@@ -119,4 +119,30 @@ function managerOverview() {
   };
 }
 
-module.exports = { lpNotices, managerOverview, buildCalls, COVERAGE_TARGET };
+// --- outreach queue (who the agent will contact, grounded in live ledger) --
+// The outreach set = every un-paid obligation on an underfunded call. Dispatching
+// persists a row per LP so the action is auditable ("who we told, when").
+function outreachQueue() {
+  const out = [];
+  for (const { call, obs } of allObligations()) {
+    const stats = fundingStats(call, obs);
+    const underfunded = stats.total > 0 && stats.ratio < COVERAGE_TARGET && call.status !== 'CallClosed';
+    if (!underfunded) continue;
+    const state = dueState(call);
+    for (const o of obs) {
+      if (o.status === 'paid') continue;
+      const amt = microNum(o.amountMicro);
+      let action;
+      if (state === 'overdue') action = 'Settle now to keep the fund on schedule.';
+      else if (state === 'approaching') action = 'Due within 72h — please settle.';
+      else action = 'Awaiting settlement by the due date.';
+      out.push({
+        callId: call.id, fundId: call.fundId, currency: call.currency, lp: o.lp,
+        amountMicro: amt, amount: amt / 1e6, state, action,
+      });
+    }
+  }
+  return out;
+}
+
+module.exports = { lpNotices, managerOverview, buildCalls, outreachQueue, COVERAGE_TARGET };

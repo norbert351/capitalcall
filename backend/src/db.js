@@ -76,6 +76,14 @@ CREATE TABLE IF NOT EXISTS proposals (
   approvals     TEXT NOT NULL,     -- JSON array
   executed      INTEGER NOT NULL DEFAULT 0
 );
+-- fund-servicing agent: dispatched outreach (auditable "who we told, when")
+CREATE TABLE IF NOT EXISTS outreach (
+  callId       TEXT NOT NULL,
+  lp           TEXT NOT NULL,
+  action       TEXT NOT NULL,
+  dispatchedAt INTEGER NOT NULL,
+  PRIMARY KEY (callId, lp)
+);
 `);
 
 const stmts = {};
@@ -115,6 +123,18 @@ function upsertProposal(p) { db.prepare(`INSERT OR REPLACE INTO proposals(id,tre
 function getProposal(id) { const r=db.prepare('SELECT * FROM proposals WHERE id=?').get(id); return r&&Object.assign({},r,{governors:JSON.parse(r.governors),approvals:JSON.parse(r.approvals),executed:!!r.executed}); }
 function listProposals() { return db.prepare('SELECT * FROM proposals').all().map(p=>Object.assign({},p,{governors:JSON.parse(p.governors),approvals:JSON.parse(p.approvals),executed:!!p.executed})); }
 
+// outreach dispatch log
+function upsertOutreach(callId, lp, action, dispatchedAt) {
+  db.prepare(`INSERT OR REPLACE INTO outreach(callId,lp,action,dispatchedAt) VALUES(?,?,?,?)`).run(callId, lp, action, dispatchedAt);
+}
+function listOutreach(callId) {
+  const rows = callId ? db.prepare(`SELECT * FROM outreach WHERE callId=?`).all(callId) : db.prepare('SELECT * FROM outreach').all();
+  return rows.map(r => Object.assign({}, r));
+}
+function lastOutreach() {
+  return db.prepare('SELECT MAX(dispatchedAt) m, COUNT(*) n FROM outreach').get();
+}
+
 module.exports = {
   db,
   getUsers, userByHandle, insertUser, createSession, userByToken, deleteSession,
@@ -123,4 +143,5 @@ module.exports = {
   upsertObligation, obligationsForLp, obligation, obligationsForCall,
   upsertTreasury, getTreasury, listTreasuries,
   upsertProposal, getProposal, listProposals,
+  upsertOutreach, listOutreach, lastOutreach,
 };
