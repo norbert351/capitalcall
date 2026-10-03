@@ -65,7 +65,7 @@ with due-state + action, an 80%-coverage at-risk flag, and an automated outreach
 
 ## Deliverables in-repo
 
-`docs/ARCHITECTURE.md` · `docs/AGENT.md` · `docs/DEMO.md` · `docs/VERIFICATION.md` · `docs/SUBMISSION.md` · `docker/{Dockerfile.backend,docker-compose.yml,bootstrap.sh}` · `daml/`
+`docs/ARCHITECTURE.md` · `docs/AGENT.md` · `docs/DEMO.md` · `docs/VERIFICATION.md` · `docs/SUBMISSION.md` · `docs/rubric.md` (criterion→evidence map) · `docker/{Dockerfile.backend,docker-compose.yml,bootstrap.sh}` · `daml/`
 
 ## Repro (for judges)
 
