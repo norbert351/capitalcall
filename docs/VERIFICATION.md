@@ -27,7 +27,7 @@ image with a transcript). ⚠️ = built but not re-exercised live this session.
 | **Servicing Agent notices (LP)** | ✅ | `GET /api/agent/notices` — lp1 sees its OWN overdue notice + action |
 | Loyal DvP settle click-through | ✅ | contract green + settleE2E exercised against sim this session |
 | Treasury quorum click-through | ✅ | contract test green (test_governed_treasury_quorum) |
-| Real Canton LocalNet (`CANTON_LEDGER=json`) | ⚠️ | `CantonJsonApi` + runtime party/package discovery built; live `daml start` re-boot not run this session (image/port pressure) |
+| Real Canton LocalNet (`CANTON_LEDGER=json`) | ✅ | **re-verified this session (2026-10-03):** sandbox via `daml start` Docker (mem-capped), `:7575/readyz` 200; parties `gp1/lp1/lp2/audit1/vault` allocated (`::12209e1c…`); fund create 201; `issueCall` → 2 live `LPObligation` events (observers=auditor+LP); **privacy: GP sees 2, `lp1` sees 1 own-only, auditor sees 2**; **atomic settle lp1 → `shareId …:lp1, liveLedger:true`**; **treasury quorum (thr 2) `executed:true`** + idempotent re-approve. Package id `ca489756…` auto-resolved |
 
 ## Deployment
 
@@ -42,10 +42,12 @@ image with a transcript). ⚠️ = built but not re-exercised live this session.
 - **docs/ was empty** → built `docs/{ARCHITECTURE,AGENT,DEMO,VERIFICATION,SUBMISSION}.md`.
 - **Servicing agent** was an in-progress, uncommitted feature → verified live (overview),
   minor `pending` filter bug fixed, now versioned.
-- **Remote/real-ledger re-boot** → the reproducible path is `docker compose … up`; not
-  re-run live this session. Flag it explicitly rather than claim it.
+- **Remote/real-ledger re-boot** → re-verified **live this session** on a real `daml start`
+  LocalNet (sandbox + JSON API :7575): fund→call→privacy→atomic-settle→treasury-quorum all
+  exercised against real Canton contract events (see Real Canton LocalNet row). Fix in this
+  session: `issueCall` crashed on string epoch-`due` → coerce `Number(due)` before ISO.
 
-**Bottom line:** the juding-critical surfaces (atomic DvP contract, governed-treasury
-quorum, privacy, auth, servicing agent) are ✅ on the contract + sim layers and the real
-ledger was verified end-to-end in the previous session. The only un-re-exercised surface
-today is a fresh real-`daml start` reboot, which is documented as runnable in one command.
+**Bottom line:** the judging-critical surfaces (atomic DvP contract, governed-treasury
+quorum, privacy, auth, servicing agent, outreach) are **✅ on the contract, sim, AND a real
+`daml start` LocalNet this session** — the full lifecycle (create fund → issue call →
+privacy → atomic settle → treasury quorum) was exercised against live Canton contract events.

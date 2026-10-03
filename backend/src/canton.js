@@ -354,7 +354,7 @@ class CantonJsonApi {
     const callPayload = {
       capCallId: id, capFundId: fundId, capFundName: f.name,
       capGp: gpParty, capAuditor: auditorParty,
-      capCurrency: currency, capDue: new Date(due || Date.now()).toISOString(),
+      capCurrency: currency, capDue: new Date(Number(due) || Date.now()).toISOString(),
       capLps: lpParties, capStatus: 'CallPending',
     };
     const created = await this._call('POST', '/v1/create', _gpToken, {

@@ -59,9 +59,10 @@ with due-state + action, an 80%-coverage at-risk flag, and an automated outreach
 ## Verified vs built-out (honest)
 
 - ✅ Exercised live: Daml tests green, auth, console + **Servicing Agent** (at-risk call flagged,
-  outreach queued), marketing site, Caddy prefix.
-- ⚠️ Real-LocalNet is a one-command boot (`docker compose -f docker/docker-compose.yml up --build`);
-  verified end-to-end in the prior session, re-runnable live. Full matrix: `docs/VERIFICATION.md`.
+  outreach queued + dispatched), marketing site, Caddy prefix, HTTPS domain.
+- ✅ **Real Ledger re-verified this session** (`daml start` LocalNet): fund→call→privacy→atomic
+  settle→treasury quorum all exercised against live Canton contract events. One-command boot:
+  `docker compose -f docker/docker-compose.yml up --build`. Full matrix: `docs/VERIFICATION.md`.
 
 ## Deliverables in-repo
 
