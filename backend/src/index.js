@@ -7,6 +7,7 @@ const path = require('node:path');
 const fs = require('node:fs');
 const db = require('./db');
 const { getLedger, canonParty } = require('./canton');
+const agent = require('./agent');
 
 const PORT = process.env.PORT || 8080;
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
@@ -219,6 +220,19 @@ const server = http.createServer(async (req, res) => {
     // ---- health + ledger mode ----
     if (method === 'GET' && p === '/api/health') {
       return json(res, 200, { ok: true, ledger: process.env.CANTON_LEDGER || 'sim', time: new Date().toISOString() });
+    }
+
+    // ---- fund-servicing agent ----
+    // Manager overview: underfunded-call flagging + coverage.
+    if (method === 'GET' && p === '/api/agent/overview') {
+      const u2 = requireAuth(req, res); if (!u2) return;
+      if (u2.role !== 'GP' && u2.role !== 'AUDITOR') return json(res, 403, { error: 'agent overview requires GP or auditor role' });
+      return json(res, 200, agent.managerOverview());
+    }
+    // LP notices: what this LP owes, with due-state + plain-language action.
+    if (method === 'GET' && p === '/api/agent/notices') {
+      const u2 = requireAuth(req, res); if (!u2) return;
+      return json(res, 200, { notices: agent.lpNotices(u2.handle) });
     }
 
     json(res, 404, { error: `no route ${method} ${p}` });

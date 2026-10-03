@@ -97,6 +97,9 @@ tr:last-child td{border-bottom:none}
 
 .empty{padding:28px;text-align:center;color:var(--mut);border:1px dashed var(--line2);border-radius:var(--radius)}
 .empty .a{font-size:26px;margin-bottom:6px}
+.call-flag{background:var(--warn-dim);border:1px solid rgba(224,112,92,.35);color:var(--txt);
+  padding:11px 13px;border-radius:10px;margin-bottom:10px;font-size:14px}
+.call-flag.warn{border-left:3px solid var(--warn)}
 
 label{display:block;font:500 12px var(--body);color:var(--mut);margin-bottom:8px;letter-spacing:.02em}
 input[type=text],input[type=password],input[type=number],select,input{width:100%;padding:13px 14px;

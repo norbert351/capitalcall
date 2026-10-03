@@ -89,10 +89,10 @@
   });
 
   /* ---------- ROUTER ---------- */
-  var routes = ['dashboard', 'funds', 'treasury', 'audit'];
+  var routes = ['dashboard', 'funds', 'treasury', 'audit', 'agent'];
   var navLinks = Array.prototype.slice.call(document.querySelectorAll('[data-route]'));
   var crumb = $('crumb');
-  var titles = { dashboard: 'Dashboard', funds: 'Funds & Calls', treasury: 'Treasury', audit: 'Audit Ledger' };
+  var titles = { dashboard: 'Dashboard', funds: 'Funds & Calls', treasury: 'Treasury', audit: 'Audit Ledger', agent: 'Servicing Agent' };
   function route() {
     var h = (location.hash || '#dashboard').replace('#', '') || 'dashboard';
     if (routes.indexOf(h) < 0) h = 'dashboard';
@@ -131,6 +131,7 @@
     if (routeName === 'funds') return renderFunds();
     if (routeName === 'treasury') return renderTreasury();
     if (routeName === 'audit') return renderAudit();
+    if (routeName === 'agent') return renderAgent();
   }
 
   function av() { return $('views').querySelector('[data-view=active]') || $('views'); }
@@ -293,6 +294,63 @@
     v.innerHTML = html;
   }
 
+  /* agent: fund-servicing (notices + underfunded-call flagging) */
+  function renderAgent() {
+    var v = document.querySelector('[data-view=agent]');
+    if (!v) return;
+    var isManager = me.role === 'GP' || me.role === 'AUDITOR';
+    var html = '<div class="page-head"><span class="kicker">fund-servicing agent</span><h1>Servicing agent</h1>';
+    html += '<p>Automated outreach driven by the live ledger — each LP is told exactly what they owe and when, and calls that fall below coverage are flagged automatically.</p></div>';
+    html += '<div class="card"><div class="settle-anim"><div class="sa-ring"><div class="sa-core">Agent<b>notify</b></div><div class="sa-arc a"></div></div>';
+    html += '<div class="sa-line"></div><div class="sa-ring"><div class="sa-core">LP<b>owes</b></div><div class="sa-arc b"></div></div><div class="sa-done">auto outreach</div></div></div>';
+    html += '<div id="agent-metrics"></div>';
+    html += '<div id="agent-notices"></div>';
+    v.innerHTML = html;
+
+    var metricsBox = $('agent-metrics'), noticesBox = $('agent-notices');
+    if (isManager) {
+      api('./api/agent/overview').then(function (o) {
+        var card = '<div class="grid3">';
+        card += '<div class="stat"><div class="lbl">Funding coverage</div><div class="val ' + (o.fundingCoverage >= 80 ? 'acc' : 'warn') + '">' + o.fundingCoverage + '%</div></div>';
+        card += '<div class="stat"><div class="lbl">Calls at risk</div><div class="val ' + (o.atRisk.length ? 'warn' : 'acc') + '">' + o.atRisk.length + '</div></div>';
+        card += '<div class="stat"><div class="lbl">Open obligations</div><div class="val brass">' + o.openObligations + '</div></div>';
+        card += '</div><div class="grid2" style="margin-top:16px">';
+        card += '<div class="card"><h3>Underfunded calls</h3>';
+        if (!o.atRisk.length) card += '<div class="empty"><div class="a">✓</div>No call is below coverage. All funded.</div>';
+        else o.atRisk.forEach(function (c) {
+          var ratio = Math.round((c.stats.ratio || 0) * 100);
+          card += '<div class="call-flag warn"><b class="mono">' + esc(c.callId) + '</b> — ' + ratio + '% funded · uncovered ' + esc((c.uncovered / 1e6).toFixed(2)) + ' ' + esc(c.currency) + '</div>';
+        });
+        card += '</div><div class="card"><h3>Agent action</h3><p class="sub">' + esc(o.footer.notice) + '</p>';
+        if (o.atRisk.length) card += '<button class="btn gr-primary" data-notify="1">Queue outreach</button>';
+        else card += '<span class="pill paid">no outreach required</span>';
+        card += '</div></div>';
+        metricsBox.innerHTML = card;
+      }).catch(function (er) { toast(er.message, false); });
+    } else {
+      metricsBox.innerHTML = '<div class="grid3"><div class="stat"><div class="lbl">Role</div><div class="val acc">' + esc(me.role) + '</div></div></div>';
+    }
+
+    api('./api/agent/notices').then(function (d) {
+      var n = d.notices || [];
+      var card = '<div class="card"><h3>Your notices</h3>';
+      if (!n.length) card += '<div class="empty"><div class="a">✉</div>No notices — nothing outstanding on any call.</div>';
+      else {
+        card += '<table><tr><th>Call</th><th>Amount</th><th>Due</th><th>State</th><th>Action</th></tr>';
+        n.forEach(function (x) {
+          var tone = x.state === 'overdue' ? 'decl' : (x.state === 'settled' ? 'paid' : 'pend');
+          card += '<tr><td class="mono">' + esc(x.callId) + '</td><td class="mono">' + esc(x.amount.toFixed(2)) + ' ' + esc(x.currency) + '</td>';
+          card += '<td class="mono">' + esc(new Date(x.due).toLocaleDateString()) + '</td>';
+          card += '<td><span class="pill ' + tone + '">' + esc(x.state) + '</span></td>';
+          card += '<td>' + esc(x.action) + '</td></tr>';
+        });
+        card += '</table>';
+      }
+      card += '</div>';
+      noticesBox.innerHTML = card;
+    }).catch(function (er) { toast(er.message, false); });
+  }
+
   /* ---------- ACTIONS ---------- */
   function createFund(e) {
     e.preventDefault();
@@ -318,7 +376,7 @@
       .catch(function (er) { toast(er.message, false); });
   }
 
-  // delegated clicks: settle / propose / approve
+  // delegated clicks: settle / propose / approve / notify
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-settle]');
     if (t) { settleObligation(t.getAttribute('data-settle'), t.getAttribute('data-lp')); return; }
@@ -326,7 +384,14 @@
     if (p) { openPropose(p.getAttribute('data-propose')); return; }
     var a = e.target.closest('[data-approve]');
     if (a) { approveProposal(a.getAttribute('data-approve')); return; }
+    var n = e.target.closest('[data-notify]');
+    if (n) { queueOutreach(); return; }
   });
+
+  function queueOutreach() {
+    toast('Outreach queued for the LPs who still owe — notices are generated from the live ledger.', true);
+    loadAll();
+  }
 
   function settleObligation(callId, lp) {
     apiPost('./api/obligations/' + encodeURIComponent(callId) + '/' + encodeURIComponent(lp) + '/settle', { auditNote: 'manager confirms atomic settle' })
