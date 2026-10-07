@@ -4,8 +4,21 @@
 **Track:** 3 · Investment Infrastructure **+** BitSafe governed-treasury challenge
 **Stack:** Daml 2.10 / Canton · Node (zero-dep) · vanilla-JS console · Docker LocalNet
 **Demo:** `https://capitalcall.afterhourequity.xyz/` (console: `/app` as **gp1** ; LP view as **lp1**; auditor as **audit1**, password `pass1234`)
-**Status:** submission-ready — docs, demo script, verification matrix in `docs/`.
+**Status:** MVP submission-ready — Daml spine + backend + console + docs all in-repo and verified
+(see `docs/VERIFICATION.md` for the ✅/⚠️ matrix). **Not production-ready**: the public demo runs on
+the offline `SimulatedCanton` seam, no real fund is onboarded, and there is no user-validation data
+(`docs/METRICS.md` states exactly what is and is not observed).
 Deadline **Oct 9 2026 23:59 UTC** · Grand Final **Oct 21 2026**.
+
+## Pre-existing code disclosure
+
+CapitalCall was started for this hackathon. Everything under `daml/`, `backend/`, `docker/` and
+`docs/` was written for HackCanton S3 during the delivery window (see `git log`). The only
+pre-existing/third-party components are standard tooling: the **Daml SDK 2.10.2** and its
+`daml-prim` / `daml-stdlib` / `daml-script-lts` libraries (declared in `daml/daml.yaml`), the
+`digitalasset/daml-sdk` Docker image used by `docker/docker-compose.yml`, and Node 22. `web/`
+contains a single `design.md` note and no code — the working UI is `backend/public/`.
+
 
 ---
 
@@ -66,7 +79,7 @@ with due-state + action, an 80%-coverage at-risk flag, and an automated outreach
 
 ## Deliverables in-repo
 
-`docs/ARCHITECTURE.md` · `docs/AGENT.md` · `docs/DEMO.md` · `docs/VERIFICATION.md` · `docs/SUBMISSION.md` · `docs/rubric.md` (criterion→evidence map) · `docker/{Dockerfile.backend,docker-compose.yml,bootstrap.sh}` · `daml/`
+`docs/PITCH.md` (one-page business brief: problem, ICP, why Canton, GTM, pricing) · `docs/METRICS.md` (validation: observed vs not-observed vs targeted) · `docs/ARCHITECTURE.md` · `docs/AGENT.md` · `docs/DEMO.md` · `docs/VERIFICATION.md` · `docs/SUBMISSION.md` · `docs/rubric.md` (criterion→evidence map) · `docker/{Dockerfile.backend,docker-compose.yml,bootstrap.sh}` · `daml/`
 
 ## Repro (for judges)
 

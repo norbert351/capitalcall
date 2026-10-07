@@ -19,6 +19,9 @@ image with a transcript). ⚠️ = built but not re-exercised live this session.
 | Claim | Status | Evidence |
 |---|---|---|
 | Zero-dep server boots | ✅ | `CapitalCall backend on :8080 (ledger=sim)` |
+| **Backend test suite** (auth, roles, privacy, quorum) | ✅ | `cd backend && npm test` → **9 tests / 9 pass / 0 fail** (`node --test`) |
+| Role enforcement (anon / LP→GP-only) | ✅ | live: anon → `/api/funds` **401**; `lp1` → `/api/agent/overview` **403** |
+| Demo URL durability | ✅ | `systemctl --user` unit on `:8095` with `Restart=always` — verified: `kill -9` → auto-restart → 200 |
 | Native auth (gp1 = GP) | ✅ | signed in via browser → dashboard + Agent gated correctly |
 | Marketing landing served | ✅ | `GET /app`, `GET /` return HTML (200) |
 | Product console — 5 views render | ✅ | nav links + Agent view DOM verified |

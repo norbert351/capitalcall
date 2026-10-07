@@ -14,7 +14,7 @@ Judge asks: *real fund/DAO/capital-coordination MVP, role workflows, transparenc
 | **Configurable privacy** (ledger-enforced per-LP visibility) | Daml disclosure predicate (`LPObligation` observers) + `visibleCalls`/`visibleObligations` | curl: GP sees N obligations, `lp1` sees only its own |
 | **Auditability / immutable trail** (create→call→settle→share) | `CallPaymentEscrow`, `LPShare`, `outreach` log; Audit Ledger view | Console view `Audit Ledger` renders every obligation + shareId; `daml test` green |
 | **Operational logic** (governed decision-making, no unilateral GP capital movement) | `GovernedTreasury`/`TransferProposal` quorum (BitSafe) | `daml test`: `test_governed_treasury_quorum: ok, 2 active contracts, 3 transactions` |
-| One-page business brief (ICP, use case, who pays, why Canton) | `docs/SUBMISSION.md` (pitch) + this file | Live product demo |
+| One-page business brief (ICP, use case, who pays, why Canton) | `docs/PITCH.md` (problem → ICP → why Canton → GTM → pricing) | `docs/PITCH.md` |
 
 ## BitSafe challenge — "Decentralizing Apps on Canton" (Contribution Pool, 20,000 CC)
 Judge asks (1–5): relevance · decentralization+originality · working implementation · path beyond hackathon. **"Show the decentralization, don't just claim it."**

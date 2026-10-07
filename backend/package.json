@@ -1,0 +1,11 @@
+{
+  "name": "capitalcall-backend",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CapitalCall backend — zero-dependency Node HTTP API + real Canton JSON-API client",
+  "engines": { "node": ">=22" },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  }
+}

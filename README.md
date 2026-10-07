@@ -42,6 +42,23 @@ docker run --rm -v "$PWD":/home/daml/work -w /home/daml/work \
 ```
 Both tests green: `test_issue_and_settle` (atomic DvP) and `test_governed_treasury_quorum`.
 
+## Verify the backend (zero-dep API tests)
+```bash
+cd backend && npm test        # == node --test  (9 tests, no dependencies)
+```
+Covers native auth (401 on anonymous, 409 duplicate, bad-password rejection, session
+invalidation), role enforcement (LP → GP-only surfaces = 403), **ledger-enforced per-LP
+privacy** (each LP sees only its own obligation; GP/auditor see the book), treasury quorum
+(below threshold does not dispatch; the threshold approval dispatches; double-approval
+rejected), and static serving/404. Tests boot the real server on a throwaway sqlite db
+(`CAPITALCALL_DB`) on an ephemeral port.
+
+## The always-on demo
+`systemctl --user status capitalcall` — the demo backend runs as a user service on `:8095`
+(`Restart=always`, `MemoryMax=350M`), reverse-proxied by Caddy at
+`capitalcall.afterhourequity.xyz`. It is not tied to any shell session.
+
+
 ## Run against a REAL Canton ledger (LocalNet)
 The backend speaks to a **live Canton node** through the Daml HTTP JSON API. One command:
 ```bash
